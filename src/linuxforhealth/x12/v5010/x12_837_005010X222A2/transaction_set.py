@@ -19,7 +19,7 @@ class HealthCareClaimProfessional(X12SegmentGroup):
     header: Header
     loop_1000a: Loop1000A
     loop_1000b: Loop1000B
-    loop_2000a: List[Loop2000A] = Field(min_items=1)
+    loop_2000a: List[Loop2000A] = Field(min_length=1)
     footer: Footer
 
     _validate_segment_count = root_validator(allow_reuse=True)(validate_segment_count)

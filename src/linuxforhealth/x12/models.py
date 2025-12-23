@@ -9,7 +9,7 @@ from enum import Enum
 from typing import List, Optional
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
 
 
 class X12Delimiters(BaseModel):
@@ -21,11 +21,7 @@ class X12Delimiters(BaseModel):
     repetition_separator: str = Field("^", min_length=1, max_length=1)
     segment_terminator: str = Field("~", min_length=1, max_length=1)
     component_separator: str = Field(":", min_length=1, max_length=1)
-
-    class Config:
-        # the model is immutable and hashable
-        allow_mutation = False
-        frozen = True
+    model_config = ConfigDict(frozen=True)
 
 
 class X12SegmentName(str, Enum):
@@ -125,14 +121,7 @@ class X12Segment(abc.ABC, BaseModel):
 
     delimiters: Optional[X12Delimiters] = None
     segment_name: X12SegmentName
-
-    class Config:
-        """
-        Default configuration for X12 Models
-        """
-
-        use_enum_values = True
-        extra = "forbid"
+    model_config = ConfigDict(use_enum_values=True, extra="forbid")
 
     def _process_multivalue_field(
         self,
@@ -155,9 +144,9 @@ class X12Segment(abc.ABC, BaseModel):
         """
 
         delimiters = custom_delimiters or X12Delimiters()
-        is_component_field: bool = self.__fields__[field_name].field_info.extra.get(
-            "is_component", False
-        )
+        field_info = self.model_fields[field_name]
+        extra = field_info.json_schema_extra or {}
+        is_component_field: bool = extra.get("is_component", False)
         if is_component_field:
             join_character = delimiters.component_separator
         else:
@@ -176,7 +165,7 @@ class X12Segment(abc.ABC, BaseModel):
 
         delimiters = custom_delimiters or X12Delimiters()
         x12_values = []
-        for k, v in self.dict(exclude={"delimiters"}).items():
+        for k, v in self.model_dump(exclude={"delimiters"}).items():
             if isinstance(v, str):
                 x12_values.append(v)
             elif isinstance(v, list):
@@ -222,10 +211,10 @@ class X12SegmentGroup(abc.ABC, BaseModel):
         """
         delimiters = custom_delimiters or X12Delimiters()
         x12_segments: List[str] = []
-        fields = [f for f in self.__fields__.values() if hasattr(f.type_, "x12")]
+        fields = [(name, f) for name, f in self.model_fields.items() if hasattr(f.annotation, "x12")]
 
-        for f in fields:
-            field_instance = getattr(self, f.name)
+        for name, f in fields:
+            field_instance = getattr(self, name)
 
             if field_instance is None:
                 continue

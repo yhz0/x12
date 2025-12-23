@@ -140,11 +140,11 @@ def count_segments(values: Dict) -> int:
         elif k.endswith("_segment") and isinstance(v, list):
             segment_count += len(v)
         elif isinstance(v, BaseModel):
-            segment_count += count_segments(v.dict())
+            segment_count += count_segments(v.model_dump())
         elif isinstance(v, list):
             for item in v:
                 segment_count += (
-                    count_segments(item.dict())
+                    count_segments(item.model_dump())
                     if hasattr(item, "dict")
                     else count_segments(item)
                 )

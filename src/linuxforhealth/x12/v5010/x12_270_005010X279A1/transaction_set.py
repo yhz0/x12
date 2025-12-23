@@ -24,7 +24,7 @@ class EligibilityInquiry(X12SegmentGroup):
 
     _validate_segment_count = root_validator(allow_reuse=True)(validate_segment_count)
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def validate_subscriber_name(cls, values):
         """
         Validates that the subscriber mame is present if the subscriber is a patient
@@ -44,7 +44,7 @@ class EligibilityInquiry(X12SegmentGroup):
 
         return values
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def validate_subscriber_hierarchy_child_code(cls, values):
         """
         Validates that a subscriber's hierarchy child code is set correctly based on the presence of a dependent loop.
@@ -62,7 +62,7 @@ class EligibilityInquiry(X12SegmentGroup):
                         )
         return values
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def validate_hierarchy_ids(cls, values):
         """
         Validates the HL segments linkage in regards to the entire EligibilityInquiry transaction.

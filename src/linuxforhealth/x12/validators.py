@@ -36,7 +36,7 @@ def _validate_duplicate_codes(values: Dict, segment_name: str, code_field: str):
     for segment in values.get(segment_name, []):
         # account for differing internal representation: model vs dict
         if not isinstance(segment, dict):
-            segment = segment.dict()
+            segment = segment.model_dump()
 
         code = segment.get(code_field)
         codes[code] += 1
