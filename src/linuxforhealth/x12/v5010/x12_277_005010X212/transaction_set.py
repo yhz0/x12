@@ -19,4 +19,4 @@ class HealthCareClaimsStatusResponse(X12SegmentGroup):
     loop_2000a: List[Loop2000A] = Field(min_length=1)
     footer: Footer
 
-    _validate_segment_count = root_validator(allow_reuse=True)(validate_segment_count)
+    _validate_segment_count = root_validator(allow_reuse=True, skip_on_failure=True)(validate_segment_count)

@@ -175,8 +175,8 @@ class Loop2010Aa(X12SegmentGroup):
     nm1_segment: Loop2010AaNm1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
-    ref_segment: Optional[List[Loop2010AaRefSegment]] = Field(max_length=16)
-    per_segment: Optional[List[Loop2010AaPerSegment]] = Field(max_length=2)
+    ref_segment: Optional[List[Loop2010AaRefSegment]] = Field(default=None, max_length=16)
+    per_segment: Optional[List[Loop2010AaPerSegment]] = Field(default=None, max_length=2)
 
 
 class Loop2010Ab(X12SegmentGroup):
@@ -187,7 +187,7 @@ class Loop2010Ab(X12SegmentGroup):
     nm1_segment: Loop2010AbNm1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
-    ref_segment: Optional[List[Loop2010AbRefSegment]] = Field(max_length=5)
+    ref_segment: Optional[List[Loop2010AbRefSegment]] = Field(default=None, max_length=5)
 
 
 class Loop2010Ba(X12SegmentGroup):
@@ -199,7 +199,7 @@ class Loop2010Ba(X12SegmentGroup):
     n3_segment: Optional[N3Segment] = None
     n4_segment: Optional[N4Segment] = None
     dmg_segment: Optional[DmgSegment] = None
-    ref_segment: Optional[List[Loop2010BaRefSegment]] = Field(max_length=5)
+    ref_segment: Optional[List[Loop2010BaRefSegment]] = Field(default=None, max_length=5)
 
 
 class Loop2010Bb(X12SegmentGroup):
@@ -208,7 +208,7 @@ class Loop2010Bb(X12SegmentGroup):
     """
 
     nm1_segment: Loop2010BbNm1Segment
-    ref_segment: Optional[List[Loop2010BbRefSegment]] = Field(max_length=2)
+    ref_segment: Optional[List[Loop2010BbRefSegment]] = Field(default=None, max_length=2)
 
 
 class Loop2010Bc(X12SegmentGroup):
@@ -238,7 +238,7 @@ class Loop2305(X12SegmentGroup):
     """
 
     cr7_segment: Loop2305Cr7Segment
-    hsd_segment: Optional[List[Loop2305HsdSegment]] = Field(max_length=12)
+    hsd_segment: Optional[List[Loop2305HsdSegment]] = Field(default=None, max_length=12)
 
 
 class Loop2330H(X12SegmentGroup):
@@ -295,7 +295,7 @@ class Loop2330B(X12SegmentGroup):
     n3_segment: Optional[N3Segment] = None
     n4_segment: Optional[N4Segment] = None
     dtp_segment: Optional[Loop2330BDtpSegment] = None
-    ref_segment: Optional[List[Loop2330BRefSegment]] = Field(max_length=2)
+    ref_segment: Optional[List[Loop2330BRefSegment]] = Field(default=None, max_length=2)
 
 
 class Loop2330A(X12SegmentGroup):
@@ -306,7 +306,7 @@ class Loop2330A(X12SegmentGroup):
     nm1_segment: Loop2330aNm1Segment
     n3_segment: Optional[N3Segment] = None
     n4_segment: Optional[N4Segment] = None
-    ref_segment: Optional[List[Loop2330aRefSegment]] = Field(max_length=3)
+    ref_segment: Optional[List[Loop2330aRefSegment]] = Field(default=None, max_length=3)
 
 
 class Loop2320(X12SegmentGroup):
@@ -315,8 +315,8 @@ class Loop2320(X12SegmentGroup):
     """
 
     sbr_segment: Loop2320SbrSegment
-    cas_segment: Optional[List[CasSegment]] = Field(min_length=0, max_length=5)
-    amt_segment: Optional[List[Loop2320AmtSegment]] = Field(min_length=0, max_length=8)
+    cas_segment: Optional[List[CasSegment]] = Field(default=None, min_length=0, max_length=5)
+    amt_segment: Optional[List[Loop2320AmtSegment]] = Field(default=None, min_length=0, max_length=8)
     dmg_segment: Optional[DmgSegment] = None
     oi_segment: Optional[OiSegment] = None
     moa_segment: Optional[MoaSegment] = None
@@ -328,7 +328,7 @@ class Loop2320(X12SegmentGroup):
     loop_2330f: Optional[Loop2330F] = None
     loop_2330h: Optional[Loop2330H] = None
 
-    _validate_amt_segments = root_validator(allow_reuse=True)(
+    _validate_amt_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
         validate_duplicate_amt_codes
     )
 
@@ -350,7 +350,7 @@ class Loop2310C(X12SegmentGroup):
     """
 
     nm1_segment: Optional[Loop2310CNm1Segment] = None
-    ref_segment: Optional[List[Loop2310CRefSegment]] = Field(max_length=5)
+    ref_segment: Optional[List[Loop2310CRefSegment]] = Field(default=None, max_length=5)
 
 
 class Loop2310B(X12SegmentGroup):
@@ -359,7 +359,7 @@ class Loop2310B(X12SegmentGroup):
     """
 
     nm1_segment: Loop2310BNm1Segment
-    ref_segment: Optional[List[Loop2310BRefSegment]] = Field(max_length=5)
+    ref_segment: Optional[List[Loop2310BRefSegment]] = Field(default=None, max_length=5)
 
 
 class Loop2310A(X12SegmentGroup):
@@ -369,7 +369,7 @@ class Loop2310A(X12SegmentGroup):
 
     nm1_segment: Loop2310ANm1Segment
     prv_segment: Optional[Loop2310APrvSegment] = None
-    ref_segment: Optional[List[Loop2310ARefSegment]] = Field(max_length=5)
+    ref_segment: Optional[List[Loop2310ARefSegment]] = Field(default=None, max_length=5)
 
 
 class Loop2430(X12SegmentGroup):
@@ -388,7 +388,7 @@ class Loop2420C(X12SegmentGroup):
     """
 
     nm1_segment: Loop2420CNm1Segment
-    ref_segment: Optional[List[Loop2420CRefSegment]] = Field(max_length=5)
+    ref_segment: Optional[List[Loop2420CRefSegment]] = Field(default=None, max_length=5)
 
 
 class Loop2420B(X12SegmentGroup):
@@ -397,7 +397,7 @@ class Loop2420B(X12SegmentGroup):
     """
 
     nm1_segment: Loop2420BNm1Segment
-    ref_segment: Optional[List[Loop2420BRefSegment]] = Field(max_length=5)
+    ref_segment: Optional[List[Loop2420BRefSegment]] = Field(default=None, max_length=5)
 
 
 class Loop2420A(X12SegmentGroup):
@@ -406,7 +406,7 @@ class Loop2420A(X12SegmentGroup):
     """
 
     nm1_segment: Loop2420ANm1Segment
-    ref_segment: Optional[List[Loop2420ARefSegment]] = Field(max_length=5)
+    ref_segment: Optional[List[Loop2420ARefSegment]] = Field(default=None, max_length=5)
 
 
 class Loop2410(X12SegmentGroup):
@@ -426,9 +426,9 @@ class Loop2400(X12SegmentGroup):
 
     lx_segment: LxSegment
     sv2_segment: Sv2Segment
-    pwk_segment: Optional[List[Loop2400PwkSegment]] = Field(min_length=0, max_length=10)
-    dtp_segment: Optional[List[Loop2400DtpSegment]] = Field(max_length=2)
-    amt_segment: Optional[List[Loop2400AmtSegment]] = Field(max_length=2)
+    pwk_segment: Optional[List[Loop2400PwkSegment]] = Field(default=None, min_length=0, max_length=10)
+    dtp_segment: Optional[List[Loop2400DtpSegment]] = Field(default=None, max_length=2)
+    amt_segment: Optional[List[Loop2400AmtSegment]] = Field(default=None, max_length=2)
     hcp_segment: Optional[HcpSegment] = None
     loop_2410: Optional[Loop2410] = None
     loop_2420a: Optional[Loop2420A] = None
@@ -436,7 +436,7 @@ class Loop2400(X12SegmentGroup):
     loop_2420c: Optional[Loop2420C] = None
     loop_2430: Optional[List[Loop2430]] = None
 
-    _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
+    _validate_dtp_qualifiers = root_validator(allow_reuse=True, skip_on_failure=True)(
         validate_duplicate_date_qualifiers
     )
 
@@ -447,28 +447,28 @@ class Loop2300(X12SegmentGroup):
     """
 
     clm_segment: ClmSegment
-    dtp_segment: Optional[List[Loop2300DtpSegment]] = Field(min_length=0, max_length=4)
+    dtp_segment: Optional[List[Loop2300DtpSegment]] = Field(default=None, min_length=0, max_length=4)
     cl1_segment: Optional[Cl1Segment] = None
-    pwk_segment: Optional[List[Loop2300PwkSegment]] = Field(min_length=0, max_length=10)
+    pwk_segment: Optional[List[Loop2300PwkSegment]] = Field(default=None, min_length=0, max_length=10)
     cn1_segment: Optional[Loop2300Cn1Segment] = None
-    amt_segment: Optional[List[Loop2300AmtSegment]] = Field(max_length=5)
-    ref_segment: Optional[List[Loop2300RefSegment]] = Field(max_length=15)
-    k3_segment: Optional[List[K3Segment]] = Field(max_length=10)
+    amt_segment: Optional[List[Loop2300AmtSegment]] = Field(default=None, max_length=5)
+    ref_segment: Optional[List[Loop2300RefSegment]] = Field(default=None, max_length=15)
+    k3_segment: Optional[List[K3Segment]] = Field(default=None, max_length=10)
     nte_segment: Optional[Loop2300NteSegment] = None
     cr6_segment: Optional[Cr6Segment] = None
-    crc_segment: Optional[List[Loop2300CrcSegment]] = Field(max_length=8)
-    hi_segment: Optional[List[HiSegment]] = Field(max_length=20)
-    qty_segment: Optional[List[Loop2300QtySegment]] = Field(max_length=4)
+    crc_segment: Optional[List[Loop2300CrcSegment]] = Field(default=None, max_length=8)
+    hi_segment: Optional[List[HiSegment]] = Field(default=None, max_length=20)
+    qty_segment: Optional[List[Loop2300QtySegment]] = Field(default=None, max_length=4)
     hcp_segment: Optional[HcpSegment] = None
     loop_2305: Optional[Loop2305] = None
     loop_2310a: Optional[Loop2310A] = None
     loop_2310b: Optional[Loop2310B] = None
     loop_2310c: Optional[Loop2310C] = None
     loop_2310e: Optional[Loop2310E] = None
-    loop_2320: Optional[List[Loop2320]] = Field(min_length=0, max_length=10)
+    loop_2320: Optional[List[Loop2320]] = Field(default=None, min_length=0, max_length=10)
     loop_2400: List[Loop2400] = Field(min_length=1, max_length=50)
 
-    _validate_dtp_qualifiers = root_validator(allow_reuse=True)(
+    _validate_dtp_qualifiers = root_validator(allow_reuse=True, skip_on_failure=True)(
         validate_duplicate_date_qualifiers
     )
 
@@ -500,7 +500,7 @@ class Loop2010Ca(X12SegmentGroup):
     n3_segment: N3Segment
     n4_segment: N4Segment
     dmg_segment: DmgSegment
-    ref_segment: Optional[List[Loop2010CaRefSegment]] = Field(max_length=6)
+    ref_segment: Optional[List[Loop2010CaRefSegment]] = Field(default=None, max_length=6)
 
 
 class Loop2000C(X12SegmentGroup):
@@ -511,7 +511,7 @@ class Loop2000C(X12SegmentGroup):
     hl_segment: Loop2000CHlSegment
     pat_segment: Loop2000CPatSegment
     loop_2010ca: Loop2010Ca
-    loop_2300: Optional[List[Loop2300]] = Field(min_length=0, max_length=100)
+    loop_2300: Optional[List[Loop2300]] = Field(default=None, min_length=0, max_length=100)
 
 
 class Loop2000B(X12SegmentGroup):
@@ -525,7 +525,7 @@ class Loop2000B(X12SegmentGroup):
     loop_2010bb: Optional[Loop2010Bb] = None
     loop_2010bc: Loop2010Bc
     loop_2010bd: Optional[Loop2010Bd] = None
-    loop_2300: Optional[List[Loop2300]] = Field(min_length=0, max_length=100)
+    loop_2300: Optional[List[Loop2300]] = Field(default=None, min_length=0, max_length=100)
     loop_2000c: Optional[List[Loop2000C]] = None
 
 

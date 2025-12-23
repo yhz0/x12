@@ -144,7 +144,7 @@ class X12Segment(abc.ABC, BaseModel):
         """
 
         delimiters = custom_delimiters or X12Delimiters()
-        field_info = self.model_fields[field_name]
+        field_info = type(self).model_fields[field_name]
         extra = field_info.json_schema_extra or {}
         is_component_field: bool = extra.get("is_component", False)
         if is_component_field:
@@ -191,6 +191,33 @@ class X12Segment(abc.ABC, BaseModel):
         return x12_str + delimiters.segment_terminator
 
 
+def _has_x12_method(annotation) -> bool:
+    """Check if an annotation type (or its inner type for List/Optional) has an x12 method."""
+    from typing import get_origin, get_args, Union
+
+    # Direct check
+    if hasattr(annotation, "x12"):
+        return True
+
+    # Check for List or Optional (Union with None)
+    origin = get_origin(annotation)
+    if origin is list:
+        args = get_args(annotation)
+        if args:
+            # Recursively check the inner type
+            return _has_x12_method(args[0])
+    elif origin is Union:
+        # Optional[X] is Union[X, None]
+        args = get_args(annotation)
+        for arg in args:
+            if arg is not type(None):
+                # Recursively check each non-None type in the union
+                if _has_x12_method(arg):
+                    return True
+
+    return False
+
+
 class X12SegmentGroup(abc.ABC, BaseModel):
     """
     Abstract base class for a container, typically a loop or transaction, which groups x12 segments.
@@ -211,7 +238,7 @@ class X12SegmentGroup(abc.ABC, BaseModel):
         """
         delimiters = custom_delimiters or X12Delimiters()
         x12_segments: List[str] = []
-        fields = [(name, f) for name, f in self.model_fields.items() if hasattr(f.annotation, "x12")]
+        fields = [(name, f) for name, f in type(self).model_fields.items() if _has_x12_method(f.annotation)]
 
         for name, f in fields:
             field_instance = getattr(self, name)

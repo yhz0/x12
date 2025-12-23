@@ -84,7 +84,7 @@ class Loop2200E(X12SegmentGroup):
 
     trn_segment: Loop2200DTrnSegment
     stc_segment: List[StcSegment]
-    ref_segment: Optional[List[Loop2200DRefSegment]] = Field(min_length=0, max_length=7)
+    ref_segment: Optional[List[Loop2200DRefSegment]] = Field(default=None, min_length=0, max_length=7)
     dtp_segment: Optional[Loop2200DDtpSegment] = None
     loop_2220e: Optional[List[Loop2220E]] = None
 
@@ -125,7 +125,7 @@ class Loop2200D(X12SegmentGroup):
 
     trn_segment: Loop2200DTrnSegment
     stc_segment: List[StcSegment]
-    ref_segment: Optional[List[Loop2200DRefSegment]] = Field(min_length=0, max_length=7)
+    ref_segment: Optional[List[Loop2200DRefSegment]] = Field(default=None, min_length=0, max_length=7)
     dtp_segment: Optional[Loop2200DDtpSegment] = None
     loop_2220d: Optional[List[Loop2220D]] = None
 
@@ -175,7 +175,7 @@ class Loop2000C(X12SegmentGroup):
     hl_segment: Loop2000CHlSegment
     loop_2100c: Loop2100C
     loop_2200c: Optional[Loop2200C] = None
-    loop_2000d: Optional[List[Loop2000D]] = Field(min_length=1)
+    loop_2000d: Optional[List[Loop2000D]] = Field(default=None, min_length=1)
 
 
 class Loop2200B(X12SegmentGroup):
@@ -203,7 +203,7 @@ class Loop2000B(X12SegmentGroup):
     hl_segment: Loop2000BHlSegment
     loop_2100b: Loop2100B
     loop_2200b: Optional[Loop2200B] = None
-    loop_2000c: Optional[List[Loop2000C]] = Field(min_length=1)
+    loop_2000c: Optional[List[Loop2000C]] = Field(default=None, min_length=1)
 
 
 class Loop2100A(X12SegmentGroup):

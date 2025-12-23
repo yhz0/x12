@@ -59,7 +59,7 @@ class Header(X12SegmentGroup):
     bpr_segment: BprSegment
     trn_segment: HeaderTrnSegment
     cur_segment: Optional[HeaderCurSegment] = None
-    ref_segment: Optional[List[HeaderRefSegment]] = Field(min_length=0, max_length=2)
+    ref_segment: Optional[List[HeaderRefSegment]] = Field(default=None, min_length=0, max_length=2)
     dtm_segment: Optional[DtmSegment] = None
 
 
@@ -71,7 +71,7 @@ class Loop1000A(X12SegmentGroup):
     n1_segment: Loop1000AN1Segment
     n3_segment: N3Segment
     n4_segment: N4Segment
-    ref_segment: Optional[List[Loop1000ARefSegment]] = Field(min_length=0, max_length=4)
+    ref_segment: Optional[List[Loop1000ARefSegment]] = Field(default=None, min_length=0, max_length=4)
     per_segment: Optional[List[Loop1000APerSegment]] = None
 
 
@@ -93,12 +93,12 @@ class Loop2110(X12SegmentGroup):
     """
 
     svc_segment: SvcSegment
-    dtm_segment: Optional[List[Loop2110DtmSegment]] = Field(min_length=0, max_length=2)
-    cas_segment: Optional[List[Loop2110CasSegment]] = Field(min_length=0, max_length=99)
-    ref_segment: Optional[List[Loop2110RefSegment]] = Field(min_length=0, max_length=24)
-    amt_segment: Optional[List[Loop2110AmtSegment]] = Field(min_length=0, max_length=9)
-    qty_segment: Optional[List[Loop2110QtySegment]] = Field(min_length=0, max_length=6)
-    lq_segment: Optional[List[Loop2110LqSegment]] = Field(min_length=0, max_length=99)
+    dtm_segment: Optional[List[Loop2110DtmSegment]] = Field(default=None, min_length=0, max_length=2)
+    cas_segment: Optional[List[Loop2110CasSegment]] = Field(default=None, min_length=0, max_length=99)
+    ref_segment: Optional[List[Loop2110RefSegment]] = Field(default=None, min_length=0, max_length=24)
+    amt_segment: Optional[List[Loop2110AmtSegment]] = Field(default=None, min_length=0, max_length=9)
+    qty_segment: Optional[List[Loop2110QtySegment]] = Field(default=None, min_length=0, max_length=6)
+    lq_segment: Optional[List[Loop2110LqSegment]] = Field(default=None, min_length=0, max_length=99)
 
 
 class Loop2100(X12SegmentGroup):
@@ -107,16 +107,16 @@ class Loop2100(X12SegmentGroup):
     """
 
     clp_segment: ClpSegment
-    cas_segment: Optional[List[Loop2100CasSegment]] = Field(min_length=0, max_length=99)
+    cas_segment: Optional[List[Loop2100CasSegment]] = Field(default=None, min_length=0, max_length=99)
     nm1_segment: List[Nm1Segment] = Field(min_length=1, max_length=7)
     mia_segment: Optional[MiaSegment] = None
     moa_segment: Optional[MoaSegment] = None
-    ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_length=0, max_length=15)
-    dtm_segment: Optional[List[Loop2100DtmSegment]] = Field(min_length=0, max_length=5)
-    per_segment: Optional[List[Loop2100PerSegment]] = Field(min_length=0, max_length=2)
-    amt_segment: Optional[List[Loop2100AmtSegment]] = Field(min_length=0, max_length=13)
-    qty_segment: Optional[List[Loop2100QtySegment]] = Field(min_length=0, max_length=14)
-    loop_2110: Optional[List[Loop2110]] = Field(min_length=0, max_length=99)
+    ref_segment: Optional[List[Loop2100RefSegment]] = Field(default=None, min_length=0, max_length=15)
+    dtm_segment: Optional[List[Loop2100DtmSegment]] = Field(default=None, min_length=0, max_length=5)
+    per_segment: Optional[List[Loop2100PerSegment]] = Field(default=None, min_length=0, max_length=2)
+    amt_segment: Optional[List[Loop2100AmtSegment]] = Field(default=None, min_length=0, max_length=13)
+    qty_segment: Optional[List[Loop2100QtySegment]] = Field(default=None, min_length=0, max_length=14)
+    loop_2110: Optional[List[Loop2110]] = Field(default=None, min_length=0, max_length=99)
 
     @root_validator(skip_on_failure=True)
     def validate_balance(cls, values):

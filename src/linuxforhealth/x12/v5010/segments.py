@@ -164,7 +164,7 @@ class BgnSegment(X12Segment):
     transaction_set_creation_date: Union[str, datetime.date]
     transaction_set_creation_time: Union[str, datetime.time]
     time_zone_code: Optional[TimeZoneCode] = None
-    original_transaction_set_reference_number: Optional[str] = Field(
+    original_transaction_set_reference_number: Optional[str] = Field(default=None, 
         min_length=1, max_length=50
     )
     transaction_type_code: Optional[str] = Field(default=None, min_length=2, max_length=2)
@@ -454,13 +454,13 @@ class ClmSegment(X12Segment):
     total_claim_charge_amount: Decimal = Decimal("0.00")
     claim_filing_indicator_code: Optional[str] = Field(default=None, min_length=1, max_length=2)
     non_institutional_claim_type_code: Optional[str] = Field(default=None, min_length=1, max_length=2)
-    health_care_service_location_information: str = Field(is_component=True)
+    health_care_service_location_information: str = Field(json_schema_extra={"is_component": True})
     provider_or_supplier_signature_indicator: Optional[str] = Field(default=None, max_length=1)
     provider_accept_assignment_code: ProviderAcceptAssignmentCode
     benefit_assignment_certification_indicator: BenefitsAssignmentCertificationIndicator
     release_of_information_code: ReleaseOfInformationCode
     patient_signature_source_code: Optional[str] = Field(default=None, max_length=1)
-    related_causes_code: Optional[str] = Field(default=None, is_component=True)
+    related_causes_code: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     special_program_code: Optional[str] = Field(default=None, max_length=3)
     yes_no_condition_response_code_1: Optional[str] = Field(default=None, max_length=1)
     level_of_service_code: Optional[str] = Field(default=None, max_length=3)
@@ -533,8 +533,8 @@ class ClpSegment(X12Segment):
     claim_frequency_type_code: Optional[str] = Field(default=None, max_length=1)
     patient_status_code: Optional[str] = Field(default=None, max_length=2)
     drg_code: Optional[str] = Field(default=None, max_length=4)
-    drg_weight: Optional[Annotated[Decimal, Field(gt=Decimal("0.0"))]]
-    discharge_fraction: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
+    drg_weight: Optional[Annotated[Decimal, Field(gt=Decimal("0.0"))]] = None
+    discharge_fraction: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
     condition_response_code: Optional[str] = Field(default=None, max_length=1)
 
 
@@ -736,7 +736,7 @@ class CtpSegment(X12Segment):
     price_identifier_code: Optional[str] = Field(default=None, max_length=3)
     unit_price: Optional[Decimal] = None
     quantity: Decimal
-    composite_unit_of_measure: str = Field(is_component=True)
+    composite_unit_of_measure: str = Field(json_schema_extra={"is_component": True})
 
 
 class CurSegment(X12Segment):
@@ -1266,8 +1266,8 @@ class EbSegment(X12Segment):
     quantity: Optional[Decimal] = None
     authorization_certification_indicator: Optional[AuthorizationCertificationIndicator] = None
     inplan_network_indicator: Optional[InPlanNetworkIndicator] = None
-    procedure_identifier: Optional[List[str]] = Field(is_component=True)
-    diagnosis_code_pointer: Optional[List[str]] = Field(is_component=True)
+    procedure_identifier: Optional[List[str]] = Field(default=None, json_schema_extra={"is_component": True})
+    diagnosis_code_pointer: Optional[List[str]] = Field(default=None, json_schema_extra={"is_component": True})
 
     @root_validator(skip_on_failure=True)
     def validate_quantity(cls, values):
@@ -1333,10 +1333,10 @@ class EqSegment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.EQ
     service_type_code: Optional[List[str]] = None
-    medical_procedure_id: Optional[List[str]] = Field(is_component=True)
+    medical_procedure_id: Optional[List[str]] = Field(default=None, json_schema_extra={"is_component": True})
     coverage_level_code: Optional[str] = Field(default=None, max_length=3)
     insurance_type_code: Optional[str] = Field(default=None, max_length=3)
-    diagnosis_code_pointer: Optional[List[str]] = Field(is_component=True)
+    diagnosis_code_pointer: Optional[List[str]] = Field(default=None, json_schema_extra={"is_component": True})
 
     @root_validator(skip_on_failure=True)
     def validate_type_and_procedure_code(cls, values):
@@ -1602,18 +1602,18 @@ class HiSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.HI
-    health_care_code_1: List = Field(is_component=True)
-    health_care_code_2: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_3: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_4: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_5: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_6: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_7: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_8: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_9: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_10: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_11: Optional[List] = Field(default=None, is_component=True)
-    health_care_code_12: Optional[List] = Field(default=None, is_component=True)
+    health_care_code_1: List = Field(json_schema_extra={"is_component": True})
+    health_care_code_2: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_3: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_4: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_5: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_6: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_7: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_8: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_9: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_10: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_11: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_code_12: Optional[List] = Field(default=None, json_schema_extra={"is_component": True})
 
 
 class HlSegment(X12Segment):
@@ -1865,7 +1865,7 @@ class IdcSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.IDC
     plan_coverage_description: str = Field(min_length=1, max_length=50)
     identification_card_type_code: IdentificationCardTypeCode
-    identification_card_count: Optional[int] = Annotated[int, Field(gt=0)]
+    identification_card_count: Optional[Annotated[int, Field(gt=0)]] = None
     action_code: Optional[ActionCode] = None
 
 
@@ -1952,7 +1952,7 @@ class InsSegment(X12Segment):
     maintenance_type_code: str = Field(min_length=3, max_length=3)
     maintenance_reason_code: Optional[str] = Field(default=None, max_length=3)
     benefit_status_code: str = Field(min_length=1, max_length=1)
-    medicare_status_code: Optional[List[str]] = Field(is_component=True)
+    medicare_status_code: Optional[List[str]] = Field(default=None, json_schema_extra={"is_component": True})
     cobra_qualifying_event_code: Optional[str] = Field(default=None, max_length=2)
     employment_status_code: Optional[str] = Field(default=None, max_length=2)
     student_status_code: Optional[str] = Field(default=None, max_length=1)
@@ -2046,7 +2046,7 @@ class K3Segment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.K3
     fixed_format_information: str = Field(min_length=1, max_length=80)
     record_format_code: Optional[str] = Field(default=None, max_length=2)
-    composite_unit_of_measurement: Optional[str] = Field(default=None, is_component=True)
+    composite_unit_of_measurement: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
 
 
 class LeSegment(X12Segment):
@@ -2727,17 +2727,17 @@ class PlbSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.PLB
     provider_identifier: str = Field(min_length=1, max_length=50)
     fiscal_period_date: Union[str, datetime.date]
-    adjustment_reason_code_1: str = Field(is_component=True)
+    adjustment_reason_code_1: str = Field(json_schema_extra={"is_component": True})
     provider_adjustment_amount_1: Decimal
-    adjustment_reason_code_2: Optional[str] = Field(default=None, is_component=True)
+    adjustment_reason_code_2: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     provider_adjustment_amount_2: Optional[Decimal] = None
-    adjustment_reason_code_3: Optional[str] = Field(default=None, is_component=True)
+    adjustment_reason_code_3: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     provider_adjustment_amount_3: Optional[Decimal] = None
-    adjustment_reason_code_4: Optional[str] = Field(default=None, is_component=True)
+    adjustment_reason_code_4: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     provider_adjustment_amount_4: Optional[Decimal] = None
-    adjustment_reason_code_5: Optional[str] = Field(default=None, is_component=True)
+    adjustment_reason_code_5: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     provider_adjustment_amount_5: Optional[Decimal] = None
-    adjustment_reason_code_6: Optional[str] = Field(default=None, is_component=True)
+    adjustment_reason_code_6: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     provider_adjustment_amount_6: Optional[Decimal] = None
 
     _validate_x12_date = field_validator("fiscal_period_date")(validate_date_field)
@@ -2802,7 +2802,7 @@ class PwkSegment(X12Segment):
     identification_code_qualifier: Optional[str] = Field(default=None, max_length=2)
     identification_code: Optional[str] = Field(default=None, max_length=80)
     description: Optional[str] = Field(default=None, max_length=80)
-    actions_indicated: Optional[str] = Field(default=None, is_component=True)
+    actions_indicated: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     request_category_code: Optional[str] = Field(default=None, max_length=2)
 
     @root_validator(skip_on_failure=True)
@@ -2833,7 +2833,7 @@ class QtySegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.QTY
     quantity_qualifier: str = Field(min_length=2, max_length=2)
     quantity: Decimal
-    composite_unit_of_measure: Optional[str] = Field(default=None, is_component=True)
+    composite_unit_of_measure: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     free_form_message: Optional[str] = Field(default=None, max_length=30)
 
 
@@ -2925,7 +2925,7 @@ class StcSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.STC
-    health_care_claim_status_1: str = Field(is_component=True)
+    health_care_claim_status_1: str = Field(json_schema_extra={"is_component": True})
     status_effective_date: Union[str, datetime.date]
     action_code: Optional[str] = Field(default=None, max_length=2)
     total_claim_charge_amount: Optional[Decimal] = None
@@ -2934,8 +2934,8 @@ class StcSegment(X12Segment):
     payment_method_code: Optional[str] = Field(default=None, max_length=3)
     remittance_date: Optional[Union[str, datetime.date]] = None
     remittance_trace_number: Optional[str] = Field(default=None, max_length=16)
-    health_care_claim_status_2: Optional[str] = Field(default=None, is_component=True)
-    health_care_claim_status_3: Optional[str] = Field(default=None, is_component=True)
+    health_care_claim_status_2: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
+    health_care_claim_status_3: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     free_form_message_text: Optional[str] = Field(default=None, max_length=264)
 
     _validate_status_effective_date = field_validator("status_effective_date")(
@@ -2976,13 +2976,13 @@ class Sv1Segment(X12Segment):
         UNIT = "UN"
 
     segment_name: X12SegmentName = X12SegmentName.SV1
-    product_service_id_qualifier: str = Field(is_component=True)
+    product_service_id_qualifier: str = Field(json_schema_extra={"is_component": True})
     line_item_charge_amount: Decimal
     unit_basis_measurement_code: UnitBasisMeasurementCode
     service_unit_count: Annotated[Decimal, Field(gt=Decimal("0.0"))]
     place_of_service_code: Optional[str] = Field(default=None, max_length=2)
     service_type_code: Optional[str] = Field(default=None, max_length=2)
-    composite_diagnosis_code_pointer: str = Field(is_component=True)
+    composite_diagnosis_code_pointer: str = Field(json_schema_extra={"is_component": True})
     monetary_amount: Optional[Decimal] = None
     emergency_indicator: Optional[Literal["Y"]] = None
     multiple_procedure_code: Optional[str] = Field(default=None, max_length=2)
@@ -3016,7 +3016,7 @@ class Sv2Segment(X12Segment):
 
     segment_name: X12SegmentName = X12SegmentName.SV2
     service_line_revenue_code: str = Field(min_length=1, max_length=48)
-    composite_medical_procedure_identifier: Optional[str] = Field(default=None, is_component=True)
+    composite_medical_procedure_identifier: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     line_item_charge_amount: Decimal
     measurement_code: MeasurementCodes
     service_unit_count: Decimal
@@ -3044,7 +3044,7 @@ class Sv5Segment(X12Segment):
         DAILY = "6"
 
     segment_name: X12SegmentName = X12SegmentName.SV5
-    product_service_id_qualifier: str = Field(is_component=True)
+    product_service_id_qualifier: str = Field(json_schema_extra={"is_component": True})
     unit_basis_measurement_code: Literal["DA"]
     length_of_medical_necessity: Annotated[Decimal, Field(gt=Decimal("0.0"))]
     dme_rental_price: Decimal
@@ -3061,12 +3061,12 @@ class SvcSegment(X12Segment):
     """
 
     segment_name: X12SegmentName = X12SegmentName.SVC
-    composite_medical_procedure_identifier_1: str = Field(is_component=True)
+    composite_medical_procedure_identifier_1: str = Field(json_schema_extra={"is_component": True})
     line_item_charge_amount: Decimal
     line_item_provider_payment_amount: Decimal
     revenue_code: Optional[str] = Field(default=None, max_length=48)
     units_of_service_paid_count: Optional[Decimal] = None
-    composite_medical_procedure_identifier_2: Optional[str] = Field(default=None, is_component=True)
+    composite_medical_procedure_identifier_2: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     original_units_of_service_count: Optional[Decimal] = None
 
 
@@ -3080,10 +3080,10 @@ class SvdSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.SVD
     other_payer_primary_identifier: str = Field(min_length=2, max_length=80)
     service_line_paid_amount: Decimal
-    composite_medical_procedure_identifier: str = Field(is_component=True)
+    composite_medical_procedure_identifier: str = Field(json_schema_extra={"is_component": True})
     product_service_id: Optional[str] = Field(default=None, max_length=48)
     paid_service_count: Decimal
-    bundled_unbundled_line_number: Optional[Annotated[int, Field(gt=0)]]
+    bundled_unbundled_line_number: Optional[Annotated[int, Field(gt=0)]] = None
 
 
 class TrnSegment(X12Segment):
@@ -3114,17 +3114,17 @@ class Ts2Segment(X12Segment):
     total_disproportionate_share_amount: Optional[Decimal] = None
     total_capital_amount: Optional[Decimal] = None
     total_indirect_medical_education_amount: Optional[Decimal] = None
-    total_outlier_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
+    total_outlier_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
     total_day_outlier_amount: Optional[Decimal] = None
     total_cost_outlier_amount: Optional[Decimal] = None
-    average_drg_length_of_stay: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
-    total_discharge_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
-    total_cost_report_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
-    total_covered_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
-    total_covered_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
-    total_noncovered_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
+    average_drg_length_of_stay: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
+    total_discharge_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
+    total_cost_report_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
+    total_covered_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
+    total_covered_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
+    total_noncovered_day_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
     total_msp_passthrough_amount: Optional[Decimal] = None
-    average_drg_weight: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
+    average_drg_weight: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
     total_pps_capital_fsp_drg_amount: Optional[Decimal] = None
     total_pps_capital_hsp_drg_amount: Optional[Decimal] = None
     total_pps_dsh_drg_amount: Optional[Decimal] = None
@@ -3160,7 +3160,7 @@ class Ts3Segment(X12Segment):
     total_professional_component_amount: Optional[Decimal] = None
     total_msp_patient_liability_met_amount: Optional[Decimal] = None
     total_patient_reimbursement_amount: Optional[Decimal] = None
-    total_pip_claim_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]]
+    total_pip_claim_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
     total_pip_adjustment_amount: Optional[Decimal] = None
 
     _validate_fiscal_period_date = field_validator("fiscal_period_date")(parse_x12_date)

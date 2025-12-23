@@ -98,8 +98,8 @@ class Header(X12SegmentGroup):
     st_segment: HeaderStSegment
     bgn_segment: BgnSegment
     ref_segment: Optional[HeaderRefSegment] = None
-    dtp_segment: Optional[List[HeaderDtpSegment]] = Field(max_length=6)
-    qty_segment: Optional[List[HeaderQtySegment]] = Field(max_length=3)
+    dtp_segment: Optional[List[HeaderDtpSegment]] = Field(default=None, max_length=6)
+    qty_segment: Optional[List[HeaderQtySegment]] = Field(default=None, max_length=3)
 
 
 class Loop1000A(X12SegmentGroup):
@@ -235,7 +235,7 @@ class Loop2200(X12SegmentGroup):
     """
 
     dsb_segment: List[DsbSegment]
-    dtp_segment: Optional[List[Loop2200DtpSegment]] = Field(max_length=2)
+    dtp_segment: Optional[List[Loop2200DtpSegment]] = Field(default=None, max_length=2)
 
 
 class Loop2310(X12SegmentGroup):
@@ -317,7 +317,7 @@ class Loop2000(X12SegmentGroup):
     loop_2100a: Loop2100A
     loop_2100b: Optional[Loop2100B] = None
     loop_2100c: Optional[Loop2100C] = None
-    loop_2100d: Optional[List[Loop2100D]] = Field(max_length=3)
+    loop_2100d: Optional[List[Loop2100D]] = Field(default=None, max_length=3)
     loop_2100e: Optional[Loop2100E] = None
     loop_2100f: Optional[Loop2100F] = None
     loop_2100g: Optional[Loop2100G] = None

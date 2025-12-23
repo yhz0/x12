@@ -86,7 +86,7 @@ class Loop2120D(X12SegmentGroup):
     nm1_segment: Loop2120Nm1Segment
     n3_segment: Optional[N3Segment] = None
     n4_segment: Optional[N4Segment] = None
-    per_segment: Optional[List[PerSegment]] = Field(min_length=0, max_length=3)
+    per_segment: Optional[List[PerSegment]] = Field(default=None, min_length=0, max_length=3)
     prv_segment: Optional[PrvSegment] = None
 
 
@@ -97,7 +97,7 @@ class Loop2115D(X12SegmentGroup):
 
     iii_segment: IiiSegment
     ls_segment: LsSegment
-    loop_2120c: Optional[List[Loop2120D]] = Field(min_length=0, max_length=23)
+    loop_2120c: Optional[List[Loop2120D]] = Field(default=None, min_length=0, max_length=23)
     le_segment: LeSegment
 
 
@@ -107,17 +107,17 @@ class Loop2110D(X12SegmentGroup):
     """
 
     eb_segment: EbSegment
-    hsd_segment: Optional[List[HsdSegment]] = Field(min_length=0, max_length=9)
-    ref_segment: Optional[List[Loop2110RefSegment]] = Field(min_length=0, max_length=9)
-    dtp_segment: Optional[List[Loop2110DtpSegment]] = Field(min_length=0, max_length=20)
-    aaa_segment: Optional[List[Loop2110CAaaSegment]] = Field(min_length=0, max_length=9)
-    msg_segment: Optional[List[MsgSegment]] = Field(min_length=0, max_length=10)
-    loop_2115d: Optional[List[Loop2115D]] = Field(min_length=0, max_length=10)
+    hsd_segment: Optional[List[HsdSegment]] = Field(default=None, min_length=0, max_length=9)
+    ref_segment: Optional[List[Loop2110RefSegment]] = Field(default=None, min_length=0, max_length=9)
+    dtp_segment: Optional[List[Loop2110DtpSegment]] = Field(default=None, min_length=0, max_length=20)
+    aaa_segment: Optional[List[Loop2110CAaaSegment]] = Field(default=None, min_length=0, max_length=9)
+    msg_segment: Optional[List[MsgSegment]] = Field(default=None, min_length=0, max_length=10)
+    loop_2115d: Optional[List[Loop2115D]] = Field(default=None, min_length=0, max_length=10)
     ls_segment: Optional[LsSegment] = None
-    loop_2120d: Optional[List[Loop2120D]] = Field(min_length=0, max_length=23)
+    loop_2120d: Optional[List[Loop2120D]] = Field(default=None, min_length=0, max_length=23)
     le_segment: Optional[LeSegment] = None
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
+    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 
@@ -128,20 +128,20 @@ class Loop2100D(X12SegmentGroup):
     """
 
     nm1_segment: Loop2100DNm1Segment
-    ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_length=0, max_length=9)
+    ref_segment: Optional[List[Loop2100RefSegment]] = Field(default=None, min_length=0, max_length=9)
     n3_segment: Optional[N3Segment] = None
     n4_segment: Optional[N4Segment] = None
     # Loop2100D AAA is identical to Loop2100B AAA
-    aaa_segment: Optional[List[Loop2100BAaaSegment]] = Field(min_length=0, max_length=9)
+    aaa_segment: Optional[List[Loop2100BAaaSegment]] = Field(default=None, min_length=0, max_length=9)
     prv_segment: Optional[PrvSegment] = None
     dmg_segment: Optional[DmgSegment] = None
     ins_segment: Optional[Loop2100DInsSegment] = None
     hi_segment: Optional[HiSegment] = None
-    dtp_segment: Optional[List[Loop2100DtpSegment]] = Field(min_length=0, max_length=9)
+    dtp_segment: Optional[List[Loop2100DtpSegment]] = Field(default=None, min_length=0, max_length=9)
     mpi_segment: Optional[MpiSegment] = None
-    loop_2110d: Optional[List[Loop2110D]] = Field(min_length=0)
+    loop_2110d: Optional[List[Loop2110D]] = Field(default=None, min_length=0)
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
+    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 
@@ -152,7 +152,7 @@ class Loop2000D(X12SegmentGroup):
     """
 
     hl_segment: Loop2000DHlSegment
-    trn_segment: Optional[List[TrnSegment]] = Field(min_length=0, max_length=2)
+    trn_segment: Optional[List[TrnSegment]] = Field(default=None, min_length=0, max_length=2)
     loop_2100d: Loop2100D
 
 
@@ -164,7 +164,7 @@ class Loop2120C(X12SegmentGroup):
     nm1_segment: Loop2120Nm1Segment
     n3_segment: Optional[N3Segment] = None
     n4_segment: Optional[N4Segment] = None
-    per_segment: Optional[List[PerSegment]] = Field(min_length=0, max_length=3)
+    per_segment: Optional[List[PerSegment]] = Field(default=None, min_length=0, max_length=3)
     prv_segment: Optional[PrvSegment] = None
 
 
@@ -175,7 +175,7 @@ class Loop2115C(X12SegmentGroup):
 
     iii_segment: IiiSegment
     ls_segment: LsSegment
-    loop_2120c: Optional[List[Loop2120C]] = Field(min_length=0, max_length=23)
+    loop_2120c: Optional[List[Loop2120C]] = Field(default=None, min_length=0, max_length=23)
     le_segment: LeSegment
 
 
@@ -185,17 +185,17 @@ class Loop2110C(X12SegmentGroup):
     """
 
     eb_segment: EbSegment
-    hsd_segment: Optional[List[HsdSegment]] = Field(min_length=0, max_length=9)
-    ref_segment: Optional[List[Loop2110RefSegment]] = Field(min_length=0, max_length=9)
-    dtp_segment: Optional[List[Loop2110DtpSegment]] = Field(min_length=0, max_length=20)
-    aaa_segment: Optional[List[Loop2110CAaaSegment]] = Field(min_length=0, max_length=9)
-    msg_segment: Optional[List[MsgSegment]] = Field(min_length=0, max_length=10)
-    loop_2115c: Optional[List[Loop2115C]] = Field(min_length=0, max_length=10)
+    hsd_segment: Optional[List[HsdSegment]] = Field(default=None, min_length=0, max_length=9)
+    ref_segment: Optional[List[Loop2110RefSegment]] = Field(default=None, min_length=0, max_length=9)
+    dtp_segment: Optional[List[Loop2110DtpSegment]] = Field(default=None, min_length=0, max_length=20)
+    aaa_segment: Optional[List[Loop2110CAaaSegment]] = Field(default=None, min_length=0, max_length=9)
+    msg_segment: Optional[List[MsgSegment]] = Field(default=None, min_length=0, max_length=10)
+    loop_2115c: Optional[List[Loop2115C]] = Field(default=None, min_length=0, max_length=10)
     ls_segment: Optional[LsSegment] = None
-    loop_2120c: Optional[List[Loop2120C]] = Field(min_length=0, max_length=23)
+    loop_2120c: Optional[List[Loop2120C]] = Field(default=None, min_length=0, max_length=23)
     le_segment: Optional[LeSegment] = None
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
+    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 
@@ -224,20 +224,20 @@ class Loop2100C(X12SegmentGroup):
     """
 
     nm1_segment: Loop2100CNm1Segment
-    ref_segment: Optional[List[Loop2100RefSegment]] = Field(min_length=0, max_length=9)
+    ref_segment: Optional[List[Loop2100RefSegment]] = Field(default=None, min_length=0, max_length=9)
     n3_segment: Optional[N3Segment] = None
     n4_segment: Optional[N4Segment] = None
     # Loop2100C AAA is identical to Loop2100B AAA
-    aaa_segment: Optional[List[Loop2100BAaaSegment]] = Field(min_length=0, max_length=9)
+    aaa_segment: Optional[List[Loop2100BAaaSegment]] = Field(default=None, min_length=0, max_length=9)
     prv_segment: Optional[PrvSegment] = None
     dmg_segment: Optional[DmgSegment] = None
     ins_segment: Optional[Loop2100CInsSegment] = None
     hi_segment: Optional[HiSegment] = None
-    dtp_segment: Optional[List[Loop2100DtpSegment]] = Field(min_length=0, max_length=9)
+    dtp_segment: Optional[List[Loop2100DtpSegment]] = Field(default=None, min_length=0, max_length=9)
     mpi_segment: Optional[MpiSegment] = None
-    loop_2110c: Optional[List[Loop2110C]] = Field(min_length=0)
+    loop_2110c: Optional[List[Loop2110C]] = Field(default=None, min_length=0)
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
+    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 
@@ -248,9 +248,9 @@ class Loop2000C(X12SegmentGroup):
     """
 
     hl_segment: Loop2000CHlSegment
-    trn_segment: Optional[List[TrnSegment]] = Field(min_length=0, max_length=2)
+    trn_segment: Optional[List[TrnSegment]] = Field(default=None, min_length=0, max_length=2)
     loop_2100c: Loop2100C
-    loop_2000d: Optional[List[Loop2000D]] = Field(min_length=0)
+    loop_2000d: Optional[List[Loop2000D]] = Field(default=None, min_length=0)
 
 
 class Loop2100B(X12SegmentGroup):
@@ -265,7 +265,7 @@ class Loop2100B(X12SegmentGroup):
     aaa_segment: Optional[List[Loop2100BAaaSegment]] = None
     prv_segment: Optional[Loop2100BPrvSegment] = None
 
-    _validate_ref_segments = root_validator(allow_reuse=True)(
+    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 
@@ -286,8 +286,8 @@ class Loop2100A(X12SegmentGroup):
     """
 
     nm1_segment: Loop2100ANm1Segment
-    prv_segment: Optional[List[PrvSegment]] = Field(min_length=0, max_length=3)
-    aaa_segment: Optional[List[Loop2100AAaaSegment]] = Field(min_length=0, max_length=9)
+    prv_segment: Optional[List[PrvSegment]] = Field(default=None, min_length=0, max_length=3)
+    aaa_segment: Optional[List[Loop2100AAaaSegment]] = Field(default=None, min_length=0, max_length=9)
 
 
 class Loop2000A(X12SegmentGroup):
@@ -298,7 +298,7 @@ class Loop2000A(X12SegmentGroup):
     """
 
     hl_segment: Loop2000AHlSegment
-    aaa_segment: Optional[List[Loop2000AAaaSegment]] = Field(min_length=0, max_length=9)
+    aaa_segment: Optional[List[Loop2000AAaaSegment]] = Field(default=None, min_length=0, max_length=9)
     loop_2100a: Loop2100A
     loop_2000b: List[Loop2000B] = Field(min_length=0)
 
