@@ -11,7 +11,10 @@ Field validators support a varying signature:
     - (cls, v, values, config) - where "config" is the model config
     - (cls, kwargs) - provides a key word arguments shorthand for the above parameters
 """
-from typing import Dict, Union
+from typing import Dict, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 from collections import defaultdict
 from datetime import datetime
 from .support import parse_x12_date, count_segments
@@ -49,36 +52,39 @@ def _validate_duplicate_codes(values: Dict, segment_name: str, code_field: str):
     return values
 
 
-def validate_duplicate_ref_codes(cls, values: Dict):
+def validate_duplicate_ref_codes(self) -> "Self":
     """
     Validates that a loop does not contain duplicate REF codes.
 
-    :param values: The validated transaction data.
+    :param self: The validated model instance.
     :raises: ValueError if duplicate REF codes are found.
     """
-    return _validate_duplicate_codes(
-        values, "ref_segment", "reference_identification_qualifier"
+    _validate_duplicate_codes(
+        self.model_dump(), "ref_segment", "reference_identification_qualifier"
     )
+    return self
 
 
-def validate_duplicate_amt_codes(cls, values: Dict):
+def validate_duplicate_amt_codes(self) -> "Self":
     """
     Validates that a loop does not contain duplicate REF codes.
 
-    :param values: The validated transaction data.
+    :param self: The validated model instance.
     :raises: ValueError if duplicate REF codes are found.
     """
-    return _validate_duplicate_codes(values, "amt_segment", "amount_qualifier_code")
+    _validate_duplicate_codes(self.model_dump(), "amt_segment", "amount_qualifier_code")
+    return self
 
 
-def validate_duplicate_date_qualifiers(cls, values: Dict):
+def validate_duplicate_date_qualifiers(self) -> "Self":
     """
     Validates that a loop does not contain duplicate DTP date qualifiers.
 
-    :param values: The validated transaction data.
+    :param self: The validated model instance.
     :raises: ValueError if duplicate DTP date qualifiers are found.
     """
-    return _validate_duplicate_codes(values, "dtp_segment", "date_time_qualifier")
+    _validate_duplicate_codes(self.model_dump(), "dtp_segment", "date_time_qualifier")
+    return self
 
 
 def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]:
@@ -121,23 +127,23 @@ def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]
         return handle_x12_date(v)
 
 
-def validate_segment_count(cls, values) -> Dict:
+def validate_segment_count(self) -> "Self":
     """
     Validates the segment count conveyed in the transaction set footer, or SE segment.
     This function is only able to count "valid" segments since it is invoked as a "post" validator.
 
-    :param values: The valid transaction set values.
+    :param self: The validated transaction set model instance.
     """
-    expected_count: int = values["footer"].se_segment.transaction_segment_count
+    expected_count: int = self.footer.se_segment.transaction_segment_count
 
     if not expected_count:
         raise ValueError("Expected transaction count not found in SE segment")
 
-    actual_count: int = count_segments(values)
+    actual_count: int = count_segments(self.model_dump())
 
     if expected_count != actual_count:
         raise ValueError(
             f"SE segment count {expected_count} != actual count {actual_count}"
         )
 
-    return values
+    return self

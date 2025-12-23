@@ -46,7 +46,7 @@ from .segments import (
     Loop2110LqSegment,
 )
 from typing import Optional, List
-from pydantic import Field, root_validator
+from pydantic import Field, model_validator
 from decimal import Decimal
 
 
@@ -118,8 +118,8 @@ class Loop2100(X12SegmentGroup):
     qty_segment: Optional[List[Loop2100QtySegment]] = Field(default=None, min_length=0, max_length=14)
     loop_2110: Optional[List[Loop2110]] = Field(default=None, min_length=0, max_length=99)
 
-    @root_validator(skip_on_failure=True)
-    def validate_balance(cls, values):
+    @model_validator(mode="after")
+    def validate_balance(self):
         """
         Validates the claim totals reported in the CLP segment against the adjustments made in CAS segments.
         The balance is calculated as:
@@ -127,21 +127,21 @@ class Loop2100(X12SegmentGroup):
 
         CAS segments exist within loops 2100 and 2110
         """
-        clp_segment = values.get("clp_segment")
+        clp_segment = getattr(self, "clp_segment", None)
         if not clp_segment:
-            return values
+            return self
         charge_amount = clp_segment.total_claim_charge_amount
         payment_amount = clp_segment.claim_payment_amount
         adjustment_amount = Decimal("0.0")
 
-        cas_segments = values.get("cas_segment", [])
+        cas_segments = getattr(self, "cas_segment", [])
         for adjustment in cas_segments:
             adjustment_data = adjustment.model_dump()
             for i in range(1, 7, 1):
                 amount = adjustment_data.get(f"monetary_amount_{i}")
                 adjustment_amount += amount if amount else Decimal("0.0")
 
-        loop_2110 = values.get("loop_2110") or []
+        loop_2110 = getattr(self, "loop_2110", None) or []
         for service_payment in loop_2110:
             adjustments = service_payment.cas_segment or []
             for adjustment in adjustments:
@@ -155,7 +155,7 @@ class Loop2100(X12SegmentGroup):
                 f"Unable to balance charge amount {charge_amount} paid amount {payment_amount} against adjustments {adjustment_amount}"
             )
 
-        return values
+        return self
 
 
 class Loop2000(X12SegmentGroup):

@@ -25,7 +25,7 @@ from linuxforhealth.x12.v4010.segments import (
 )
 from typing import Literal, Optional, Dict
 from enum import Enum
-from pydantic import Field, root_validator
+from pydantic import Field, model_validator
 
 
 class HeaderStSegment(StSegment):
@@ -574,22 +574,22 @@ class Loop2300DtpSegment(DtpSegment):
     date_time_qualifier: DateTimeQualifier
     date_time_period_format_qualifier: DateTimePeriodFormatQualifier
 
-    @root_validator(skip_on_failure=True)
-    def validate_disability_dates(cls, values: Dict):
+    @model_validator(mode="after")
+    def validate_disability_dates(self):
         """
         Validates that a date range qualifier is used for disability dates.
 
         :param values: The model's values
         :return: The model's values
         """
-        date_qualifier = values.get("date_time_qualifier")
-        period_qualifier = values.get("date_time_period_format_qualifier")
+        date_qualifier = self.date_time_qualifier
+        period_qualifier = self.date_time_period_format_qualifier
 
         if date_qualifier == "314" and period_qualifier != "RD8":
             raise ValueError(
                 "RD8 Date Time Period is required for Disability Dates (314)"
             )
-        return values
+        return self
 
 
 class Loop2300PwkSegment(PwkSegment):
@@ -862,24 +862,24 @@ class Loop2300CrcSegment(CrcSegment):
     Claim information conditions indicators
     """
 
-    @root_validator(skip_on_failure=True)
-    def validate_specialized_crc_segment(cls, values):
+    @model_validator(mode="after")
+    def validate_specialized_crc_segment(self):
         """
         Parses the CRC segments code category to determine which model is used for validation.
         """
-        code_category = values.get("code_category")
+        code_category = self.code_category
 
         if code_category == "07":
-            Loop2300CrcAmbulanceCertification(**values)
+            Loop2300CrcAmbulanceCertification(**self.model_dump())
         elif code_category in ("E1", "E2", "E3"):
-            Loop2300CrcPatientConditionVision(**values)
+            Loop2300CrcPatientConditionVision(**self.model_dump())
         elif code_category == "75":
-            Loop2300CrcHomeboundIndicator(**values)
+            Loop2300CrcHomeboundIndicator(**self.model_dump())
         elif code_category == "ZZ":
-            Loop2300CrcEpSdtRefferal(**values)
+            Loop2300CrcEpSdtRefferal(**self.model_dump())
         else:
             raise ValueError(f"Unknown CRC01 code category value {code_category}")
-        return values
+        return self
 
 
 class Loop2305Cr7Segment(Cr7Segment):

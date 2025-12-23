@@ -5,7 +5,7 @@ Defines the Health Care Claims Payment 835 005010X221A1 transaction set model.
 """
 from linuxforhealth.x12.models import X12SegmentGroup
 from .loops import Header, Footer, Loop1000A, Loop1000B, Loop2000
-from pydantic import model_validator, root_validator
+from pydantic import model_validator, model_validator
 from linuxforhealth.x12.validators import validate_segment_count
 from typing import List, Set
 
@@ -21,7 +21,7 @@ class HealthCareClaimPayment(X12SegmentGroup):
     loop_2000: List[Loop2000]
     footer: Footer
 
-    _validate_segment_count = root_validator(skip_on_failure=True)(validate_segment_count)
+    _validate_segment_count = model_validator(mode="after")(validate_segment_count)
 
     @model_validator(mode='after')
     def validate_lx_header(self):

@@ -11,14 +11,15 @@ from enum import Enum
 from typing import Dict, List, Literal, Optional, Tuple, Union
 from decimal import Decimal
 
-from pydantic import model_validator, Field, PositiveInt, validator, root_validator
+from pydantic import model_validator, Field, PositiveInt, ValidationInfo
 
 from linuxforhealth.x12.models import X12Segment, X12SegmentName
 from linuxforhealth.x12.support import (
     parse_x12_date,
     parse_interchange_date,
-    field_validator,
 )
+from pydantic import field_validator as pydantic_field_validator
+from linuxforhealth.x12.support import field_validator
 from linuxforhealth.x12.validators import validate_date_field
 from typing_extensions import Annotated
 
@@ -169,14 +170,13 @@ class BprSegment(X12Segment):
 
     _validate_x12_date = field_validator("eft_effective_date")(validate_date_field)
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("payment_format_code")
-    def validate_payment_format_code(cls, v, values):
+    @pydantic_field_validator("payment_format_code")
+    @classmethod
+    def validate_payment_format_code(cls, v, info: ValidationInfo):
         """
         Validates that the payment format code is present for ACH transactions
         """
-        is_ach = values.get("payment_method_code") == "ACH"
+        is_ach = info.data.get("payment_method_code") == "ACH"
         if is_ach and not v:
             raise ValueError("payment_format_code is required for ACH transactions")
         return v
@@ -255,8 +255,8 @@ class CasSegment(X12Segment):
     monetary_amount_6: Optional[Decimal] = None
     quantity_6: Optional[Decimal] = None
 
-    @root_validator(skip_on_failure=True)
-    def validate_adjustments(cls, values):
+    @model_validator(mode="after")
+    def validate_adjustments(self):
         """
         Validates that an adjustment "set" has a reason code, amount, and quantity.
 
@@ -264,8 +264,8 @@ class CasSegment(X12Segment):
         """
         for i in range(1, 7, 1):
             adjustment_fields: Tuple = (
-                values.get(f"adjustment_reason_code_{i}"),
-                values.get(f"monetary_amount_{i}"),
+                getattr(self, f"adjustment_reason_code_{i}", None),
+                getattr(self, f"monetary_amount_{i}", None),
             )
 
             if any(adjustment_fields) and not all(adjustment_fields):
@@ -273,7 +273,7 @@ class CasSegment(X12Segment):
                     f"Adjustment set {i} is required to have a reason code, amount, and quantity"
                 )
 
-        return values
+        return self
 
 
 class ClmSegment(X12Segment):
@@ -819,23 +819,23 @@ class DmgSegment(X12Segment):
 
     _validate_x12_date = field_validator("date_time_period")(validate_date_field)
 
-    @root_validator(skip_on_failure=True)
-    def validate_date_time_fields(cls, values):
+    @model_validator(mode="after")
+    def validate_date_time_fields(self):
         """
         Validates that both a date_time_period_format_qualifier and date_time_period are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        date_fields: Tuple = values.get(
-            "date_time_period_format_qualifier"
-        ), values.get("date_time_period")
+        date_fields: Tuple = getattr(
+            self, "date_time_period_format_qualifier", None
+        ), getattr(self, "date_time_period", None)
 
         if any(date_fields) and not all(date_fields):
             raise ValueError(
                 "DMG Segment requires both a date_time_period_format_qualifier and date time period if one or the other is present"
             )
 
-        return values
+        return self
 
 
 class DtmSegment(X12Segment):
@@ -1264,21 +1264,21 @@ class EbSegment(X12Segment):
     procedure_identifier: Optional[List[str]] = Field(default=None, json_schema_extra={"is_component": True})
     diagnosis_code_pointer: Optional[List[str]] = Field(default=None, json_schema_extra={"is_component": True})
 
-    @root_validator(skip_on_failure=True)
-    def validate_quantity(cls, values):
+    @model_validator(mode="after")
+    def validate_quantity(self):
         """
         Validates that both a quantity_qualifier and quantity are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        quantity_fields: Tuple = values.get("quantity_qualifier"), values.get(
-            "quantity"
+        quantity_fields: Tuple = getattr(self, "quantity_qualifier", None), getattr(
+            self, "quantity", None
         )
 
         if any(quantity_fields) and not all(quantity_fields):
             raise ValueError("Quantity requires the quantity identifier and value.")
 
-        return values
+        return self
 
 
 class EqSegment(X12Segment):
@@ -1295,15 +1295,15 @@ class EqSegment(X12Segment):
     insurance_type_code: Optional[str] = Field(default=None, max_length=3)
     diagnosis_code_pointer: Optional[List[str]] = Field(default=None, json_schema_extra={"is_component": True})
 
-    @root_validator(skip_on_failure=True)
-    def validate_type_and_procedure_code(cls, values):
+    @model_validator(mode="after")
+    def validate_type_and_procedure_code(self):
         """
         Validates that the EQ segment contains a service type code or a medical procedure id
 
         :param values: The raw, unvalidated transaction data.
         """
-        reference_fields: Tuple = values.get("service_type_code"), values.get(
-            "medical_procedure_id"
+        reference_fields: Tuple = getattr(self, "service_type_code", None), getattr(
+            self, "medical_procedure_id", None
         )
 
         if not any(reference_fields):
@@ -1311,7 +1311,7 @@ class EqSegment(X12Segment):
                 "Service Type Code or Medical Procedure is required for EQ segment"
             )
 
-        return values
+        return self
 
 
 class FrmSegment(X12Segment):
@@ -1610,30 +1610,30 @@ class HsdSegment(X12Segment):
     delivery_frequency_code: Optional[DeliveryFrequencyCode] = None
     delivery_pattern_time_code: Optional[DeliveryPatternTimeCode] = None
 
-    @root_validator(skip_on_failure=True)
-    def validate_quantity(cls, values):
+    @model_validator(mode="after")
+    def validate_quantity(self):
         """
         Validates that quantity values are conveyed with a qualifier and value.
 
         :param values: The raw, unvalidated transaction data.
         """
-        quantity_fields: Tuple = values.get("quantity_qualifier"), values.get(
-            "quantity"
+        quantity_fields: Tuple = getattr(self, "quantity_qualifier", None), getattr(
+            self, "quantity", None
         )
 
         if not any(quantity_fields):
             raise ValueError("Quantity requires a qualifier and value")
 
-        return values
+        return self
 
-    @root_validator(skip_on_failure=True)
-    def validate_periods(cls, values):
+    @model_validator(mode="after")
+    def validate_periods(self):
         """
         Validates that time periods are conveyed correctly
         """
-        if values.get("period_count") and not values.get("time_period_qualifier"):
+        if getattr(self, "period_count", None) and not getattr(self, "time_period_qualifier", None):
             raise ValueError("Period requires a qualifier and value")
-        return values
+        return self
 
 
 class IeaSegment(X12Segment):
@@ -1670,32 +1670,32 @@ class IiiSegment(X12Segment):
     code_category: Optional[Literal["44"]] = None
     injured_body_part_name: Optional[str] = Field(default=None, max_length=264)
 
-    @root_validator(skip_on_failure=True)
-    def validate_industry_code(cls, values):
+    @model_validator(mode="after")
+    def validate_industry_code(self):
         """
         Validates that an industry code is conveyed with a qualifier and value, if sent at all.
 
         :param values: The validated model values.
         """
-        industry_codes = values.get("code_list_qualifier_code"), values.get(
-            "industry_code"
+        industry_codes = getattr(self, "code_list_qualifier_code", None), getattr(
+            self, "industry_code", None
         )
         if any(industry_codes) and not all(industry_codes):
             raise ValueError("Industry codes require a qualifier and value")
-        return values
+        return self
 
-    @root_validator(skip_on_failure=True)
-    def validate_nature_of_injury(cls, values):
+    @model_validator(mode="after")
+    def validate_nature_of_injury(self):
         """
         Validates the nature of injury if present
 
         :param values: The validated model values
         """
-        if values.get("code_category") and not values.get("injured_body_part_name"):
+        if getattr(self, "code_category", None) and not getattr(self, "injured_body_part_name", None):
             raise ValueError(
                 "Nature of injury requires a category and value/description"
             )
-        return values
+        return self
 
 
 class InsSegment(X12Segment):
@@ -1734,23 +1734,23 @@ class InsSegment(X12Segment):
 
     _validate_death_date = field_validator("member_death_date")(validate_date_field)
 
-    @root_validator(skip_on_failure=True)
-    def validate_member_death_datefields(cls, values):
+    @model_validator(mode="after")
+    def validate_member_death_datefields(self):
         """
         Validates that both a date_time_period_format_qualifier and member_death_date are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        date_fields: Tuple = values.get(
-            "date_time_period_format_qualifier"
-        ), values.get("member_death_date")
+        date_fields: Tuple = getattr(
+            self, "date_time_period_format_qualifier", None
+        ), getattr(self, "member_death_date", None)
 
         if any(date_fields) and not all(date_fields):
             raise ValueError(
                 "If member death date is reported both date time format qualifier and member_death_date are required."
             )
 
-        return values
+        return self
 
 
 class IsaSegment(X12Segment):
@@ -2122,15 +2122,15 @@ class MpiSegment(X12Segment):
     date_time_period_format_qualifier: Optional[DateTimePeriodFormatQualifier] = None
     date_time_period: Optional[str] = Field(default=None, max_length=35)
 
-    @root_validator(skip_on_failure=True)
-    def validate_date_fields(cls, values):
+    @model_validator(mode="after")
+    def validate_date_fields(self):
         """
         Validates that both a date_time_format_qualifier and date_time_period are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        date_fields: Tuple = values.get("date_time_format_qualifier"), values.get(
-            "date_time_period"
+        date_fields: Tuple = getattr(self, "date_time_format_qualifier", None), getattr(
+            self, "date_time_period", None
         )
 
         if any(date_fields) and not all(date_fields):
@@ -2138,7 +2138,7 @@ class MpiSegment(X12Segment):
                 "If either date_time_period_format_qualifier or date_time_period are provided, both are required"
             )
 
-        return values
+        return self
 
 
 class MsgSegment(X12Segment):
@@ -2190,15 +2190,15 @@ class N4Segment(X12Segment):
     location_identifier: Optional[str] = Field(default=None, max_length=30)
     country_subdivision_code: Optional[str] = Field(default=None, max_length=3)
 
-    @root_validator(skip_on_failure=True)
-    def validate_state_codes(cls, values):
+    @model_validator(mode="after")
+    def validate_state_codes(self):
         """
         Validates that a N4 segment does not contain both a state_province_code and country_subdivision_code
 
         :param values: The raw, unvalidated transaction data.
         """
-        state_fields: Tuple = values.get("state_province_code"), values.get(
-            "country_subdivision_code"
+        state_fields: Tuple = getattr(self, "state_province_code", None), getattr(
+            self, "country_subdivision_code", None
         )
 
         if all(state_fields):
@@ -2206,7 +2206,7 @@ class N4Segment(X12Segment):
                 "only one of state_province_code or country_subdivision_code is allowed"
             )
 
-        return values
+        return self
 
 
 class Nm1Segment(X12Segment):
@@ -2236,15 +2236,15 @@ class Nm1Segment(X12Segment):
     identification_code: Optional[str] = Field(default=None, max_length=80)
     # NM110 - NM112 are not used
 
-    @root_validator(skip_on_failure=True)
-    def validate_identification_codes(cls, values):
+    @model_validator(mode="after")
+    def validate_identification_codes(self):
         """
         Validates that both an identification code and qualifier are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        id_fields: Tuple = values.get("identification_code_qualifier"), values.get(
-            "identification_code"
+        id_fields: Tuple = getattr(self, "identification_code_qualifier", None), getattr(
+            self, "identification_code", None
         )
 
         if any(id_fields) and not all(id_fields):
@@ -2252,19 +2252,18 @@ class Nm1Segment(X12Segment):
                 "Identification code usage requires the code qualifier and code value"
             )
 
-        return values
+        return self
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("name_first", "name_middle", "name_prefix", "name_suffix")
-    def validate_organization_name_fields(cls, field_value, values):
+    @pydantic_field_validator("name_first", "name_middle", "name_prefix", "name_suffix")
+    @classmethod
+    def validate_organization_name_fields(cls, field_value, info: ValidationInfo):
         """
         Validates that person name fields are not used within an organizational record context.
 
         :param field_value: The person name field (first, middle, prefix, suffix) values
         :param values: The previously validated field names and values
         """
-        entity_type = values["entity_type_qualifier"]
+        entity_type = info.data["entity_type_qualifier"]
         if cls.EntityQualifierCode.NON_PERSON.value == entity_type:
             if field_value:
                 raise ValueError(
@@ -2359,41 +2358,41 @@ class PatSegment(X12Segment):
 
     _validate_transaction_date = field_validator("patient_death_date")(parse_x12_date)
 
-    @root_validator(skip_on_failure=True)
-    def validate_death_date(cls, values):
+    @model_validator(mode="after")
+    def validate_death_date(self):
         """
         Validates that both a date format qualifier and the patient death date are both present, if one or the other is
         present.
 
         :param values: The raw, unvalidated transaction data.
         """
-        date_fields: Tuple = values.get(
-            "date_time_period_format_qualifier"
-        ), values.get("patient_death_date")
+        date_fields: Tuple = getattr(
+            self, "date_time_period_format_qualifier", None
+        ), getattr(self, "patient_death_date", None)
 
         if any(date_fields) and not all(date_fields):
             raise ValueError(
                 "Patient Death Date requires format qualifier and date value"
             )
 
-        return values
+        return self
 
-    @root_validator(skip_on_failure=True)
-    def validate_weight(cls, values):
+    @model_validator(mode="after")
+    def validate_weight(self):
         """
         Validates that both a weight unit and value are present, if one or the other is
         present.
 
         :param values: The raw, unvalidated transaction data.
         """
-        weight_fields: Tuple = values.get("unit_basis_measurement_code"), values.get(
-            "patient_weight"
+        weight_fields: Tuple = getattr(self, "unit_basis_measurement_code", None), getattr(
+            self, "patient_weight", None
         )
 
         if any(weight_fields) and not all(weight_fields):
             raise ValueError("Patient weight requires units and value")
 
-        return values
+        return self
 
 
 class PerSegment(X12Segment):
@@ -2413,28 +2412,28 @@ class PerSegment(X12Segment):
     communication_number_qualifier_3: Optional[str] = Field(default=None, max_length=2)
     communication_number_3: Optional[str] = Field(default=None, max_length=80)
 
-    @root_validator(skip_on_failure=True)
-    def validate_communication(cls, values):
+    @model_validator(mode="after")
+    def validate_communication(self):
         """
         Validates that both a communication qualifier and number are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        communication_fields: Tuple = values.get(
-            "communication_number_qualifier_2"
-        ), values.get("communication_number_2")
+        communication_fields: Tuple = getattr(
+            self, "communication_number_qualifier_2", None
+        ), getattr(self, "communication_number_2", None)
 
         if any(communication_fields) and not all(communication_fields):
             raise ValueError("communication fields require a qualifier and number")
 
-        communication_fields = values.get(
-            "communication_number_qualifier_3"
-        ), values.get("communication_number_3")
+        communication_fields = getattr(
+            self, "communication_number_qualifier_3", None
+        ), getattr(self, "communication_number_3", None)
 
         if any(communication_fields) and not all(communication_fields):
             raise ValueError("communication fields require a qualifier and number")
 
-        return values
+        return self
 
 
 class PlbSegment(X12Segment):
@@ -2475,23 +2474,23 @@ class PrvSegment(X12Segment):
     reference_identification_qualifier: Optional[str] = Field(default=None, max_length=3)
     reference_identification: Optional[str] = Field(default=None, max_length=30)
 
-    @root_validator(skip_on_failure=True)
-    def validate_reference_id(cls, values):
+    @model_validator(mode="after")
+    def validate_reference_id(self):
         """
         Validates that both an identification value and qualifier are provided if one or the other is present
 
         :param values: The raw, unvalidated transaction data.
         """
-        reference_fields: Tuple = values.get(
-            "reference_identification_qualifier"
-        ), values.get("reference_identification")
+        reference_fields: Tuple = getattr(
+            self, "reference_identification_qualifier", None
+        ), getattr(self, "reference_identification", None)
 
         if any(reference_fields) and not all(reference_fields):
             raise ValueError(
                 "only one of reference_identification_qualifier or reference_identification is allowed"
             )
 
-        return values
+        return self
 
 
 class Ps1Segment(X12Segment):
@@ -2525,22 +2524,22 @@ class PwkSegment(X12Segment):
     actions_indicated: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     request_category_code: Optional[str] = Field(default=None, max_length=2)
 
-    @root_validator(skip_on_failure=True)
-    def validate_identification_code(cls, values):
+    @model_validator(mode="after")
+    def validate_identification_code(self):
         """
         Validates that both an identification code and code qualifier are present if either exists.
         :param values: The model values
         :return: The model values
         """
         fields = (
-            values.get("identification_code_qualifier"),
-            values.get("identification_code"),
+            getattr(self, "identification_code_qualifier", None),
+            getattr(self, "identification_code", None),
         )
 
         if any(fields) and not all(fields):
             raise ValueError("Identification code requires a qualifier and code value")
 
-        return values
+        return self
 
 
 class QtySegment(X12Segment):

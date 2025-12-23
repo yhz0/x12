@@ -65,7 +65,7 @@ from .segments import (
     Loop2000DHlSegment,
 )
 from typing import List, Optional
-from pydantic import Field, root_validator
+from pydantic import Field, model_validator
 from linuxforhealth.x12.validators import validate_duplicate_ref_codes
 
 
@@ -117,7 +117,7 @@ class Loop2110D(X12SegmentGroup):
     loop_2120d: Optional[List[Loop2120D]] = Field(default=None, min_length=0, max_length=23)
     le_segment: Optional[LeSegment] = None
 
-    _validate_ref_segments = root_validator(skip_on_failure=True)(
+    _validate_ref_segments = model_validator(mode="after")(
         validate_duplicate_ref_codes
     )
 
@@ -141,7 +141,7 @@ class Loop2100D(X12SegmentGroup):
     mpi_segment: Optional[MpiSegment] = None
     loop_2110d: Optional[List[Loop2110D]] = Field(default=None, min_length=0)
 
-    _validate_ref_segments = root_validator(skip_on_failure=True)(
+    _validate_ref_segments = model_validator(mode="after")(
         validate_duplicate_ref_codes
     )
 
@@ -195,27 +195,27 @@ class Loop2110C(X12SegmentGroup):
     loop_2120c: Optional[List[Loop2120C]] = Field(default=None, min_length=0, max_length=23)
     le_segment: Optional[LeSegment] = None
 
-    _validate_ref_segments = root_validator(skip_on_failure=True)(
+    _validate_ref_segments = model_validator(mode="after")(
         validate_duplicate_ref_codes
     )
 
-    @root_validator(skip_on_failure=True)
-    def validate_red_cross_eb_ref_codes(cls, values):
+    @model_validator(mode="after")
+    def validate_red_cross_eb_ref_codes(self):
         """
         Validates that reference identification codes are limited when American Red Cross is the eligibility benefit.
 
         :@param values: The validated model values
         """
-        benefit_code = values["eb_segment"].eligibility_benefit_information
+        benefit_code = self.eb_segment.eligibility_benefit_information
         arc_ref_types = {"1W", "49", "F6", "NQ"}
         ref_types = {
-            r.reference_identification_qualifier for r in values.get("ref_segments", [])
+            r.reference_identification_qualifier for r in getattr(self, "ref_segments", [])
         }
 
         if ref_types and benefit_code == "R" and (ref_types - arc_ref_types):
             raise ValueError(f"{ref_types} are not valid for American Red Cross")
 
-        return values
+        return self
 
 
 class Loop2100C(X12SegmentGroup):
@@ -237,7 +237,7 @@ class Loop2100C(X12SegmentGroup):
     mpi_segment: Optional[MpiSegment] = None
     loop_2110c: Optional[List[Loop2110C]] = Field(default=None, min_length=0)
 
-    _validate_ref_segments = root_validator(skip_on_failure=True)(
+    _validate_ref_segments = model_validator(mode="after")(
         validate_duplicate_ref_codes
     )
 
@@ -265,7 +265,7 @@ class Loop2100B(X12SegmentGroup):
     aaa_segment: Optional[List[Loop2100BAaaSegment]] = None
     prv_segment: Optional[Loop2100BPrvSegment] = None
 
-    _validate_ref_segments = root_validator(skip_on_failure=True)(
+    _validate_ref_segments = model_validator(mode="after")(
         validate_duplicate_ref_codes
     )
 

@@ -55,7 +55,7 @@ from .segments import (
     Loop2100BPrvSegment,
 )
 from typing import List, Optional
-from pydantic import Field, root_validator
+from pydantic import Field, model_validator
 from linuxforhealth.x12.validators import validate_duplicate_ref_codes
 
 
@@ -96,7 +96,7 @@ class Loop2100D(X12SegmentGroup):
     dtp_segment: Optional[Loop2100DtpSegment] = None
     loop_2110d: Loop2110D
 
-    _validate_ref_segments = root_validator(skip_on_failure=True)(
+    _validate_ref_segments = model_validator(mode="after")(
         validate_duplicate_ref_codes
     )
 
@@ -139,7 +139,7 @@ class Loop2100C(X12SegmentGroup):
     dtp_segment: Optional[Loop2100DtpSegment] = None
     loop_2110c: Optional[Loop2110C] = None
 
-    _validate_ref_segments = root_validator(skip_on_failure=True)(
+    _validate_ref_segments = model_validator(mode="after")(
         validate_duplicate_ref_codes
     )
 
@@ -166,7 +166,7 @@ class Loop2100B(X12SegmentGroup):
     n4_segment: Optional[N4Segment] = None
     prv_segment: Optional[Loop2100BPrvSegment] = None
 
-    _validate_ref_segments = root_validator(skip_on_failure=True)(
+    _validate_ref_segments = model_validator(mode="after")(
         validate_duplicate_ref_codes
     )
 

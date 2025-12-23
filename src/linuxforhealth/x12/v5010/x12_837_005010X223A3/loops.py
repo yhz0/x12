@@ -156,7 +156,7 @@ from linuxforhealth.x12.v5010.segments import (
     FrmSegment,
 )
 from typing import List, Optional, Dict
-from pydantic import Field, root_validator
+from pydantic import Field, model_validator
 from linuxforhealth.x12.validators import (
     validate_duplicate_date_qualifiers,
     validate_duplicate_amt_codes,
@@ -343,7 +343,7 @@ class Loop2320(X12SegmentGroup):
     loop_2330h: Optional[Loop2330H] = None
     loop_2330i: Optional[Loop2330I] = None
 
-    _validate_amt_segments = root_validator(skip_on_failure=True)(
+    _validate_amt_segments = model_validator(mode="after")(
         validate_duplicate_amt_codes
     )
 
@@ -518,19 +518,19 @@ class Loop2300(X12SegmentGroup):
     loop_2320: Optional[List[Loop2320]] = Field(default=None, min_length=0, max_length=10)
     loop_2400: List[Loop2400] = Field(min_length=1, max_length=50)
 
-    _validate_dtp_qualifiers = root_validator(skip_on_failure=True)(
+    _validate_dtp_qualifiers = model_validator(mode="after")(
         validate_duplicate_date_qualifiers
     )
 
-    @root_validator(skip_on_failure=True)
-    def validate_claim_amounts(cls, values: Dict):
+    @model_validator(mode="after")
+    def validate_claim_amounts(self):
         """
         Validates that CLM02 == SUM(Loop2400.SV102)
         """
-        claim_amount: Decimal = values.get("clm_segment").total_claim_charge_amount
+        claim_amount: Decimal = self.clm_segment.total_claim_charge_amount
         line_total: Decimal = Decimal("0.0")
 
-        for line in values.get("loop_2400", []):
+        for line in getattr(self, "loop_2400", []):
             line_total += line.sv2_segment.line_item_charge_amount
 
         if claim_amount != line_total:
@@ -538,7 +538,7 @@ class Loop2300(X12SegmentGroup):
                 f"Claim Amount {claim_amount} != Service Line Total {line_total}"
             )
 
-        return values
+        return self
 
 
 class Loop2010Ca(X12SegmentGroup):
