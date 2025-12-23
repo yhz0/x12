@@ -343,7 +343,7 @@ class Loop2320(X12SegmentGroup):
     loop_2330h: Optional[Loop2330H] = None
     loop_2330i: Optional[Loop2330I] = None
 
-    _validate_amt_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
+    _validate_amt_segments = root_validator(skip_on_failure=True)(
         validate_duplicate_amt_codes
     )
 
@@ -518,7 +518,7 @@ class Loop2300(X12SegmentGroup):
     loop_2320: Optional[List[Loop2320]] = Field(default=None, min_length=0, max_length=10)
     loop_2400: List[Loop2400] = Field(min_length=1, max_length=50)
 
-    _validate_dtp_qualifiers = root_validator(allow_reuse=True, skip_on_failure=True)(
+    _validate_dtp_qualifiers = root_validator(skip_on_failure=True)(
         validate_duplicate_date_qualifiers
     )
 

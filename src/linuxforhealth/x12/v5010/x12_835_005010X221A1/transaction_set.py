@@ -21,7 +21,7 @@ class HealthCareClaimPayment(X12SegmentGroup):
     loop_2000: List[Loop2000]
     footer: Footer
 
-    _validate_segment_count = root_validator(allow_reuse=True, skip_on_failure=True)(validate_segment_count)
+    _validate_segment_count = root_validator(skip_on_failure=True)(validate_segment_count)
 
     @model_validator(mode='after')
     def validate_lx_header(self):

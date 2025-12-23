@@ -117,7 +117,7 @@ class Loop2110D(X12SegmentGroup):
     loop_2120d: Optional[List[Loop2120D]] = Field(default=None, min_length=0, max_length=23)
     le_segment: Optional[LeSegment] = None
 
-    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
+    _validate_ref_segments = root_validator(skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 
@@ -141,7 +141,7 @@ class Loop2100D(X12SegmentGroup):
     mpi_segment: Optional[MpiSegment] = None
     loop_2110d: Optional[List[Loop2110D]] = Field(default=None, min_length=0)
 
-    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
+    _validate_ref_segments = root_validator(skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 
@@ -195,7 +195,7 @@ class Loop2110C(X12SegmentGroup):
     loop_2120c: Optional[List[Loop2120C]] = Field(default=None, min_length=0, max_length=23)
     le_segment: Optional[LeSegment] = None
 
-    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
+    _validate_ref_segments = root_validator(skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 
@@ -237,7 +237,7 @@ class Loop2100C(X12SegmentGroup):
     mpi_segment: Optional[MpiSegment] = None
     loop_2110c: Optional[List[Loop2110C]] = Field(default=None, min_length=0)
 
-    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
+    _validate_ref_segments = root_validator(skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 
@@ -265,7 +265,7 @@ class Loop2100B(X12SegmentGroup):
     aaa_segment: Optional[List[Loop2100BAaaSegment]] = None
     prv_segment: Optional[Loop2100BPrvSegment] = None
 
-    _validate_ref_segments = root_validator(allow_reuse=True, skip_on_failure=True)(
+    _validate_ref_segments = root_validator(skip_on_failure=True)(
         validate_duplicate_ref_codes
     )
 

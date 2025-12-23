@@ -398,8 +398,8 @@ def _load_transaction_model(
 
     # return transaction set model
     for _, class_value in inspect.getmembers(transaction_module, inspect.isclass):
-        if hasattr(class_value, "schema"):
-            props: Set = set(class_value.schema()["properties"])
+        if hasattr(class_value, "model_json_schema"):
+            props: Set = set(class_value.model_json_schema()["properties"])
             # transaction set models have header and footer attributes
             if props.issuperset({"header", "footer"}):
                 return class_value

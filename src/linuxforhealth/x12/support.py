@@ -179,4 +179,4 @@ def parse_x12_major_version(x12_implementation_version) -> str:
 
 # partial function used to "register" common field validator functions
 # common validator functions have the signature (cls, v, values)
-field_validator = functools.partial(validator, allow_reuse=True)
+field_validator = functools.partial(validator)
