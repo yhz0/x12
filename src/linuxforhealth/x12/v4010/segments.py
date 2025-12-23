@@ -19,7 +19,6 @@ from linuxforhealth.x12.support import (
     parse_interchange_date,
 )
 from pydantic import field_validator as pydantic_field_validator
-from linuxforhealth.x12.support import field_validator
 from linuxforhealth.x12.validators import validate_date_field
 from typing_extensions import Annotated
 
@@ -74,9 +73,10 @@ class BhtSegment(X12Segment):
     transaction_set_creation_time: str
     transaction_type_code: str = Field(min_length=2, max_length=2)
 
-    _validate_transaction_date = field_validator("transaction_set_creation_date")(
-        parse_x12_date
-    )
+    @pydantic_field_validator("transaction_set_creation_date", mode="before")
+    @classmethod
+    def _validate_transaction_date(cls, v):
+        return parse_x12_date(v)
 
 
 class BprSegment(X12Segment):
@@ -168,7 +168,10 @@ class BprSegment(X12Segment):
     receiver_account_number: Optional[str] = Field(default=None, max_length=35)
     eft_effective_date: Optional[Union[str, datetime.date]] = None
 
-    _validate_x12_date = field_validator("eft_effective_date")(validate_date_field)
+    @pydantic_field_validator("eft_effective_date", mode="before")
+    @classmethod
+    def _validate_x12_date(cls, v, info: ValidationInfo):
+        return validate_date_field(cls, v, info)
 
     @pydantic_field_validator("payment_format_code")
     @classmethod
@@ -817,7 +820,10 @@ class DmgSegment(X12Segment):
     date_time_period: Optional[Union[str, datetime.date]] = None
     gender_code: Optional[GenderCode] = None
 
-    _validate_x12_date = field_validator("date_time_period")(validate_date_field)
+    @pydantic_field_validator("date_time_period", mode="before")
+    @classmethod
+    def _validate_x12_date(cls, v, info: ValidationInfo):
+        return validate_date_field(cls, v, info)
 
     @model_validator(mode="after")
     def validate_date_time_fields(self):
@@ -849,7 +855,10 @@ class DtmSegment(X12Segment):
     date_time_qualifier: str = Field(min_length=3, max_length=3)
     production_date: Union[str, datetime.date]
 
-    _validate_x12_date = field_validator("production_date")(validate_date_field)
+    @pydantic_field_validator("production_date", mode="before")
+    @classmethod
+    def _validate_x12_date(cls, v, info: ValidationInfo):
+        return validate_date_field(cls, v, info)
 
 
 class DtpSegment(X12Segment):
@@ -870,9 +879,12 @@ class DtpSegment(X12Segment):
     segment_name: X12SegmentName = X12SegmentName.DTP
     date_time_qualifier: str = Field(min_length=3, max_length=3)
     date_time_period_format_qualifier: DateTimePeriodFormatQualifier
-    date_time_period: Union[str, datetime.date]
+    date_time_period: Union[str, datetime.date, datetime.datetime]
 
-    _validate_x12_date = field_validator("date_time_period")(validate_date_field)
+    @pydantic_field_validator("date_time_period", mode="before")
+    @classmethod
+    def _validate_x12_date(cls, v, info: ValidationInfo):
+        return validate_date_field(cls, v, info)
 
 
 class EbSegment(X12Segment):
@@ -1337,9 +1349,10 @@ class FrmSegment(X12Segment):
     question_response_3: Optional[Union[str, datetime.date]] = None
     question_response_4: Optional[Decimal] = None
 
-    _validate_question_response_3 = field_validator("question_response_3")(
-        parse_x12_date
-    )
+    @pydantic_field_validator("question_response_3", mode="before")
+    @classmethod
+    def _validate_question_response_3(cls, v):
+        return parse_x12_date(v)
 
 
 class GeSegment(X12Segment):
@@ -1371,9 +1384,10 @@ class GsSegment(X12Segment):
     responsible_agency_code: Literal["X"]
     version_identifier_code: str = Field(min_length=1, max_length=12)
 
-    _validate_creation_date = field_validator("functional_group_creation_date")(
-        parse_x12_date
-    )
+    @pydantic_field_validator("functional_group_creation_date", mode="before")
+    @classmethod
+    def _validate_creation_date(cls, v):
+        return parse_x12_date(v)
 
 
 class HcpSegment(X12Segment):
@@ -1732,7 +1746,10 @@ class InsSegment(X12Segment):
     country_code: Optional[str] = Field(default=None, max_length=3)
     birth_sequence_number: Optional[int] = None
 
-    _validate_death_date = field_validator("member_death_date")(validate_date_field)
+    @pydantic_field_validator("member_death_date", mode="before")
+    @classmethod
+    def _validate_death_date(cls, v, info: ValidationInfo):
+        return validate_date_field(cls, v, info)
 
     @model_validator(mode="after")
     def validate_member_death_datefields(self):
@@ -1779,9 +1796,10 @@ class IsaSegment(X12Segment):
     interchange_usage_indicator: str = Field(min_length=1, max_length=1)
     component_element_separator: str = Field(min_length=1, max_length=1)
 
-    _validate_interchange_date = field_validator("interchange_date")(
-        parse_interchange_date
-    )
+    @pydantic_field_validator("interchange_date", mode="before")
+    @classmethod
+    def _validate_interchange_date(cls, v):
+        return parse_interchange_date(v)
 
     def x12(self) -> str:
         """
@@ -2356,7 +2374,10 @@ class PatSegment(X12Segment):
     patient_weight: Optional[Decimal] = None
     pregnancy_indicator: Optional[Literal["Y"]] = None
 
-    _validate_transaction_date = field_validator("patient_death_date")(parse_x12_date)
+    @pydantic_field_validator("patient_death_date", mode="before")
+    @classmethod
+    def _validate_transaction_date(cls, v):
+        return parse_x12_date(v)
 
     @model_validator(mode="after")
     def validate_death_date(self):
@@ -2459,7 +2480,10 @@ class PlbSegment(X12Segment):
     adjustment_reason_code_6: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     provider_adjustment_amount_6: Optional[Decimal] = None
 
-    _validate_x12_date = field_validator("fiscal_period_date")(validate_date_field)
+    @pydantic_field_validator("fiscal_period_date", mode="before")
+    @classmethod
+    def _validate_x12_date(cls, v, info: ValidationInfo):
+        return validate_date_field(cls, v, info)
 
 
 class PrvSegment(X12Segment):
@@ -2657,13 +2681,20 @@ class StcSegment(X12Segment):
     health_care_claim_status_3: Optional[str] = Field(default=None, json_schema_extra={"is_component": True})
     free_form_message_text: Optional[str] = Field(default=None, max_length=264)
 
-    _validate_status_effective_date = field_validator("status_effective_date")(
-        parse_x12_date
-    )
-    _validate_adjudication_finalized_date = field_validator(
-        "adjudication_finalized_date"
-    )(parse_x12_date)
-    _validate_remittance_date = field_validator("remittance_date")(parse_x12_date)
+    @pydantic_field_validator("status_effective_date", mode="before")
+    @classmethod
+    def _validate_status_effective_date(cls, v):
+        return parse_x12_date(v)
+
+    @pydantic_field_validator("adjudication_finalized_date", mode="before")
+    @classmethod
+    def _validate_adjudication_finalized_date(cls, v):
+        return parse_x12_date(v)
+
+    @pydantic_field_validator("remittance_date", mode="before")
+    @classmethod
+    def _validate_remittance_date(cls, v):
+        return parse_x12_date(v)
 
 
 class StSegment(X12Segment):
@@ -2884,7 +2915,10 @@ class Ts3Segment(X12Segment):
     total_pip_claim_count: Optional[Annotated[Decimal, Field(ge=Decimal("0.0"))]] = None
     total_pip_adjustment_amount: Optional[Decimal] = None
 
-    _validate_fiscal_period_date = field_validator("fiscal_period_date")(parse_x12_date)
+    @pydantic_field_validator("fiscal_period_date", mode="before")
+    @classmethod
+    def _validate_fiscal_period_date(cls, v):
+        return parse_x12_date(v)
 
 
 # load segment classes into a lookup table indexed by segment name

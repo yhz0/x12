@@ -15,8 +15,9 @@ from typing import Dict, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+from pydantic import ValidationInfo
 from collections import defaultdict
-from datetime import datetime
+import datetime
 from .support import parse_x12_date, count_segments
 
 
@@ -87,17 +88,21 @@ def validate_duplicate_date_qualifiers(self) -> "Self":
     return self
 
 
-def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]:
+def validate_date_field(cls, v, info: ValidationInfo) -> Union[datetime.date, str, None]:
     """
     Validates a date field using the segment's date_time_period_format_qualifier (D8 or RD8).
     The date_time_period_format_qualifier is used to indicate if a date field is a specific date or a date range.
     Specific dates are have a "D8" qualifier value, while date ranges are qualified using "RD8".
 
     :param v: The date field value
-    :param values: The segment's valid values.
+    :param info: Pydantic validation info containing previously validated fields.
     :return: The validated date field value
     :raises: ValueError if the date field value is an invalid format.
     """
+    # If already parsed to date/datetime, return as-is
+    if isinstance(v, (datetime.date, datetime.datetime)):
+        return v
+
     from linuxforhealth.x12.v5010.segments import DtpSegment
 
     def handle_x12_date(date_string: str):
@@ -107,7 +112,7 @@ def validate_date_field(cls, v, values: Dict) -> Union[datetime.date, str, None]
         except ValueError:
             raise ValueError(f"Invalid date value {date_string}")
 
-    qualifier = values.get("date_time_period_format_qualifier")
+    qualifier = info.data.get("date_time_period_format_qualifier") if info.data else None
 
     # the date field may be "optional" in which case the qualifier is not present
     # if the qualifier field is required, it will be validated at the field level

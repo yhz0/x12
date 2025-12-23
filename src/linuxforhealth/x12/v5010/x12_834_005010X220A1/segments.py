@@ -3,7 +3,8 @@ segments.py
 
 Specialized segment models for the Enrollment 834 005010X220A1 transaction.
 """
-from typing import Literal, Optional
+import datetime
+from typing import Literal, Optional, Union
 from enum import Enum
 from pydantic import Field
 
@@ -700,7 +701,7 @@ class Loop2300DtpSegment(DtpSegment):
 
     date_time_qualifier: DateTimeQualifier
     date_time_period_format_qualifier: DateTimePeriodFormatQualifier
-    date_time_period: str
+    date_time_period: Union[str, datetime.date, datetime.datetime]
 
 
 class Loop2300AmtSegment(AmtSegment):
@@ -958,7 +959,7 @@ class Loop2750DtpSegment(DtpSegment):
         DATE_RANGE = "RD8"
 
     date_time_qualifier: Literal["007"]
-    date_time_period: str
+    date_time_period: Union[str, datetime.date, datetime.datetime]
 
 
 class Loop2000LeSegment(LeSegment):

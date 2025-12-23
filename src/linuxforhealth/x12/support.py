@@ -4,11 +4,10 @@ support.py
 Convenience functions for X12 Processing.
 """
 import datetime
-import functools
 import os
 from typing import Union, Dict
 
-from pydantic import validator, BaseModel
+from pydantic import BaseModel
 
 from .config import IsaDelimiters
 
@@ -95,14 +94,21 @@ def is_x12_file(file_path: str) -> bool:
         return is_x12_data(isa_segment)
 
 
-def parse_interchange_date(date_string: str) -> datetime.date:
+def parse_interchange_date(date_string) -> datetime.date:
     """Parses a datetime.date from date fields in the ISA (interchange) segment"""
+    # If already parsed to date, return as-is
+    if isinstance(date_string, datetime.date):
+        return date_string
 
     return datetime.datetime.strptime(date_string, "%y%m%d").date()
 
 
-def parse_x12_date(date_string: str) -> Union[datetime.date, datetime.datetime, None]:
+def parse_x12_date(date_string) -> Union[datetime.date, datetime.datetime, None]:
     """Parses a datetime.date or datetime.datetime from date fields in X12 transaction segments"""
+    # If already parsed to date/datetime, return as-is
+    if isinstance(date_string, (datetime.date, datetime.datetime)):
+        return date_string
+
     parsed_date = None
 
     if not date_string:
@@ -177,6 +183,3 @@ def parse_x12_major_version(x12_implementation_version) -> str:
     return x12_implementation_version[2:6]
 
 
-# partial function used to "register" common field validator functions
-# common validator functions have the signature (cls, v, values)
-field_validator = functools.partial(validator)
